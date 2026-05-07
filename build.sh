@@ -16,3 +16,6 @@ python manage.py migrate
 
 # Create superuser automatically
 python create_superuser.py
+
+# Load sample material and pricing data
+python seed_data.py
