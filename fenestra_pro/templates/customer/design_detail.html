@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% load static humanize %}
+{% block title %}{{ design.code }} — Fenestra Pro{% endblock %}
+{% block body %}
+<button class="mobile-menu-btn" aria-label="Menu">☰</button>
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-brand" style="display:flex; align-items:center; gap:0.75rem;">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                <rect x="3" y="3" width="26" height="26" rx="3" fill="var(--accent-gold-dim)" stroke="var(--accent-primary)" stroke-width="2.5"/>
+                <path d="M16 3v26M3 16h26" stroke="var(--accent-primary)" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M6 13l7-7M6 20l14-14" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+            </svg>
+            <div>
+                <h2 style="font-size:1.3rem; font-weight:700; margin:0; line-height:1;">FENESTRA <span style="color:var(--accent-primary);">PRO</span></h2>
+                <p style="margin:0; margin-top:0.2rem;">{% if request.user.is_maker %}Maker{% else %}Customer{% endif %} Portal</p>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link"><span class="icon">📊</span> Dashboard</a></div>
+            {% if request.user.is_customer %}
+            <div class="nav-section">Design</div>
+            <div class="nav-item"><a href="{% url 'design_wizard' %}" class="nav-link"><span class="icon">✏️</span> New Design</a></div>
+            {% endif %}
+            <div class="nav-item"><a href="{% url 'design_list' %}" class="nav-link active"><span class="icon">📋</span> {% if request.user.is_maker %}All Orders{% else %}My Designs{% endif %}</a></div>
+            <div class="nav-item"><a href="{% url 'quotation_list' %}" class="nav-link"><span class="icon">📄</span> Quotations</a></div>
+            {% if request.user.is_maker %}
+            <div class="nav-section">System</div>
+            <div class="nav-item"><a href="{% url 'admin:index' %}" class="nav-link"><span class="icon">⚙️</span> Admin Panel</a></div>
+            {% endif %}
+        </nav>
+        <div class="sidebar-footer"><a href="{% url 'logout' %}" class="text-small" style="color:var(--accent-red);">Sign Out</a></div>
+    </aside>
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-header-left">
+                <h1 class="page-title">{{ design.code }}</h1>
+                <p class="page-subtitle">{{ design.name }} — {{ design.get_design_type_display }}</p>
+            </div>
+            <div class="page-actions">
+                <span class="badge badge-{{ design.status }}" style="font-size:0.8rem;padding:0.35rem 1rem;">{{ design.get_status_display }}</span>
+                <a href="{% url 'design_recalculate' design.code %}" class="btn btn-secondary btn-sm">↻ Recalculate</a>
+                <a href="{% url 'download_boq_pdf' design.code %}" class="btn btn-secondary btn-sm">📄 BOQ PDF</a>
+                {% if request.user.is_maker %}
+                <a href="{% url 'download_production_pdf' design.code %}" class="btn btn-primary btn-sm">🛠 Production PDF</a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if request.user.is_maker %}
+        <div class="card card-static mb-3" style="padding:1rem;">
+            <form method="post" action="{% url 'design_update_status' design.code %}" class="flex items-center gap-2">
+                {% csrf_token %}
+                <span class="text-small text-muted" style="white-space:nowrap;">Update Status:</span>
+                <select name="status" class="form-control" style="max-width:180px;padding:0.4rem 0.7rem;font-size:0.85rem;">
+                    {% for val, label in design.Status.choices %}<option value="{{ val }}" {% if design.status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Update</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <div class="detail-grid">
+            <!-- Specifications -->
+            <div class="card card-static">
+                <h3 class="card-title mb-2">Specifications</h3>
+                <div class="spec-row"><span class="spec-label">Type</span><span class="spec-value">{{ design.get_design_type_display }}</span></div>
+                <div class="spec-row"><span class="spec-label">Dimensions</span><span class="spec-value font-mono">{{ design.width_mm }} × {{ design.height_mm }} mm</span></div>
+                <div class="spec-row"><span class="spec-label">Panels</span><span class="spec-value">{{ design.num_panels }}</span></div>
+                <div class="spec-row"><span class="spec-label">Glass</span><span class="spec-value">{{ design.get_glass_type_display }} ({{ design.glass_thickness_mm }}mm)</span></div>
+                <div class="spec-row"><span class="spec-label">Frame</span><span class="spec-value">{{ design.get_frame_material_display }}</span></div>
+                <div class="spec-row"><span class="spec-label">Finish</span><span class="spec-value">{{ design.get_finish_display }}</span></div>
+                <div class="spec-row"><span class="spec-label">Quantity</span><span class="spec-value">{{ design.quantity }}</span></div>
+                <div class="spec-row"><span class="spec-label">Area</span><span class="spec-value">{{ design.area_sqm|floatformat:3 }} sqm</span></div>
+                {% if design.mesh_required %}
+                <div class="spec-row"><span class="spec-label">Mesh</span><span class="spec-value">{{ design.get_mesh_type_display }}</span></div>
+                {% endif %}
+                {% if design.notes %}
+                <div class="divider"></div>
+                <div class="text-small text-muted">{{ design.notes }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Cost Breakdown -->
+            <div class="card card-static">
+                <h3 class="card-title mb-2">Cost Breakdown</h3>
+                {% if cost_breakdown %}
+                <div class="cost-row"><span class="cost-label">Profile Material</span><span class="cost-value">{{ cost_breakdown.currency }}{{ cost_breakdown.profile_cost }}</span></div>
+                <div class="cost-row"><span class="cost-label">Glass</span><span class="cost-value">{{ cost_breakdown.currency }}{{ cost_breakdown.glass_cost }}</span></div>
+                <div class="cost-row"><span class="cost-label">Hardware</span><span class="cost-value">{{ cost_breakdown.currency }}{{ cost_breakdown.hardware_cost }}</span></div>
+                <div class="cost-row"><span class="cost-label">Labour</span><span class="cost-value">{{ cost_breakdown.currency }}{{ cost_breakdown.labour_cost }}</span></div>
+                <div class="cost-row"><span class="cost-label">Overhead</span><span class="cost-value">{{ cost_breakdown.currency }}{{ cost_breakdown.overhead }}</span></div>
+                <div class="divider"></div>
+                <div class="cost-row"><span class="cost-label">Subtotal</span><span class="cost-value">{{ cost_breakdown.currency }}{{ cost_breakdown.subtotal }}</span></div>
+                <div class="cost-row"><span class="cost-label">Tax ({{ cost_breakdown.tax_rate }}%)</span><span class="cost-value">{{ cost_breakdown.currency }}{{ cost_breakdown.tax_amount }}</span></div>
+                <div class="cost-row cost-total"><span class="cost-label">Grand Total</span><span class="cost-value">{{ cost_breakdown.currency }}{{ cost_breakdown.total }}</span></div>
+                {% else %}
+                <div class="empty-state" style="padding:2rem 0;">
+                    <p class="text-muted">No calculation data.</p>
+                    <a href="{% url 'design_recalculate' design.code %}" class="btn btn-primary btn-sm mt-2">Run Calculation</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Cut Pieces -->
+        {% if cut_pieces %}
+        <div class="detail-section">
+            <h3 class="section-title">Profile Cutting List</h3>
+            <div class="table-wrapper">
+            <table class="data-table">
+                <thead><tr><th>Profile</th><th>Description</th><th>Length (mm)</th><th>Qty</th><th>Angle</th><th>Cost/m</th><th>Total</th></tr></thead>
+                <tbody>{% for p in cut_pieces %}<tr>
+                    <td class="font-mono text-gold">{{ p.profile_code }}</td>
+                    <td class="wrap">{{ p.description }}</td>
+                    <td class="font-mono">{{ p.length_mm }}</td>
+                    <td>{{ p.quantity }}</td>
+                    <td>{{ p.cut_angle }}</td>
+                    <td>{{ cost_breakdown.currency }}{{ p.cost_per_meter }}</td>
+                    <td class="text-nowrap"><strong>{{ cost_breakdown.currency }}{{ p.total_cost }}</strong></td>
+                </tr>{% endfor %}</tbody>
+            </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Glass -->
+        {% if glass_pieces %}
+        <div class="detail-section">
+            <h3 class="section-title">Glass Cutting List</h3>
+            <div class="table-wrapper">
+            <table class="data-table">
+                <thead><tr><th>Description</th><th>Width (mm)</th><th>Height (mm)</th><th>Area (sqm)</th><th>Qty</th><th>Type</th></tr></thead>
+                <tbody>{% for g in glass_pieces %}<tr>
+                    <td>{{ g.description }}</td>
+                    <td class="font-mono">{{ g.width_mm }}</td>
+                    <td class="font-mono">{{ g.height_mm }}</td>
+                    <td class="font-mono">{{ g.area_sqm }}</td>
+                    <td>{{ g.quantity }}</td>
+                    <td>{{ g.glass_type }}</td>
+                </tr>{% endfor %}</tbody>
+            </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Hardware BOQ -->
+        {% if hardware_items %}
+        <div class="detail-section">
+            <h3 class="section-title">Hardware Bill of Quantities</h3>
+            <div class="table-wrapper">
+            <table class="data-table">
+                <thead><tr><th>Code</th><th>Name</th><th>Unit</th><th>Qty</th><th>Unit Cost</th><th>Total</th></tr></thead>
+                <tbody>{% for h in hardware_items %}<tr>
+                    <td class="font-mono">{{ h.code }}</td>
+                    <td class="wrap">{{ h.name }}</td>
+                    <td>{{ h.unit }}</td>
+                    <td>{{ h.quantity }}</td>
+                    <td>{{ cost_breakdown.currency }}{{ h.cost_per_unit }}</td>
+                    <td class="text-nowrap"><strong>{{ cost_breakdown.currency }}{{ h.total_cost }}</strong></td>
+                </tr>{% endfor %}</tbody>
+            </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Bar Optimization -->
+        {% if bar_optimizations %}
+        <div class="detail-section">
+            <h3 class="section-title">Bar Cutting Optimization</h3>
+            {% for opt in bar_optimizations %}
+            <div class="card card-static mb-2" style="padding:1rem;">
+                <div class="flex-between mb-1">
+                    <strong class="text-gold">{{ opt.profile_name }}</strong>
+                    <span class="text-small text-muted">{{ opt.total_bars }} bar{{ opt.total_bars|pluralize }} • {{ opt.waste_percent }}% waste</span>
+                </div>
+                {% for bar in opt.bars %}
+                <div style="margin:0.4rem 0;">
+                    <div class="text-xs text-muted mb-1">Bar #{{ bar.bar_number }} — waste: {{ bar.waste_mm }}mm</div>
+                    <div style="display:flex;height:24px;border-radius:4px;overflow:hidden;background:var(--bg-tertiary);border:1px solid var(--border-subtle);">
+                        {% for cut in bar.cuts %}
+                        <div style="flex:{{ cut.length }};background:rgba(240,165,0,0.25);border-right:2px solid var(--bg-primary);display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:var(--accent-gold-light);overflow:hidden;white-space:nowrap;padding:0 2px;">{{ cut.length }}</div>
+                        {% endfor %}
+                        {% if bar.waste_mm > 0 %}
+                        <div style="flex:{{ bar.waste_mm }};background:rgba(248,81,73,0.1);display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:var(--text-muted);">{{ bar.waste_mm }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

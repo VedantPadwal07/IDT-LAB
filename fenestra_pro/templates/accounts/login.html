@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ portal|title }} Login — Fenestra Pro{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/landing.css' %}">
+<style>
+.login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg-primary); position: relative; }
+.login-page::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(240,165,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(240,165,0,0.02) 1px, transparent 1px); background-size: 50px 50px; pointer-events: none; }
+.login-card { width: 100%; max-width: 420px; padding: 2.5rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); position: relative; z-index: 1; }
+.login-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: {% if portal == 'customer' %}linear-gradient(90deg, var(--accent-gold), var(--accent-gold-light)){% else %}linear-gradient(90deg, var(--accent-blue), #79C0FF){% endif %}; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.login-header { text-align: center; margin-bottom: 2rem; }
+.login-header .brand { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800; margin-bottom: 0.5rem; }
+.login-header .brand span { color: var(--accent-gold); }
+.login-header .portal-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: {% if portal == 'customer' %}var(--accent-gold){% else %}var(--accent-blue){% endif %}; }
+.login-footer { text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted); }
+.login-footer a { color: var(--accent-gold); font-weight: 600; }
+</style>
+{% endblock %}
+{% block body %}
+<div class="login-page">
+    <div class="login-card">
+        <div class="login-header">
+            <div style="display:flex; align-items:center; justify-content:center; gap:0.75rem; margin-bottom:0.5rem;">
+                <svg width="36" height="36" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                    <rect x="3" y="3" width="26" height="26" rx="3" fill="{% if portal == 'customer' %}var(--accent-gold-dim){% else %}var(--accent-blue-dim){% endif %}" stroke="var(--accent-primary)" stroke-width="2.5"/>
+                    <path d="M16 3v26M3 16h26" stroke="var(--accent-primary)" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M6 13l7-7M6 20l14-14" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+                </svg>
+                <div class="brand" style="margin-bottom:0; font-size:1.8rem; line-height:1;">FENESTRA <span>PRO</span></div>
+            </div>
+            <div class="portal-label">{{ portal|title }} Portal</div>
+        </div>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label" for="id_username">Username</label>
+                {{ form.username }}
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="id_password">Password</label>
+                {{ form.password }}
+            </div>
+            {% if form.errors %}
+            <div class="form-error" style="margin-bottom: 1rem;">Invalid username or password.</div>
+            {% endif %}
+            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 0.5rem;">Sign In</button>
+        </form>
+        {% if portal == 'customer' %}
+        <div class="login-footer">
+            Don't have an account? <a href="{% url 'customer_register' %}">Register here</a>
+        </div>
+        {% endif %}
+        <div class="login-footer"><a href="{% url 'landing' %}">← Back to Home</a></div>
+    </div>
+</div>
+<script>
+document.querySelectorAll('.form-control, input[type="text"], input[type="password"]').forEach(el => {
+    el.classList.add('form-control');
+});
+</script>
+{% endblock %}

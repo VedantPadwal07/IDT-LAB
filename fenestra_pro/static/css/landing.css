@@ -1,0 +1,73 @@
+/* ═══════════════════════════════════════════════════════════
+   FENESTRA PRO — Landing Page
+   ═══════════════════════════════════════════════════════════ */
+
+.landing-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg-primary); overflow: hidden; align-items: center; justify-content: center; padding-top: 6rem; padding-bottom: 2rem; position: relative; }
+
+.landing-header {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+    padding: 1.5rem 2rem;
+    display: flex; justify-content: center; align-items: center;
+}
+.landing-logo { font-size: 1.8rem; font-weight: 800; color: var(--text-primary); }
+.landing-logo span { color: var(--accent-primary); }
+.landing-tagline { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--text-muted); text-align: center; margin-top: 0.15rem; }
+
+.cards-container { 
+    display: flex; gap: 2rem; 
+    max-width: 1000px; width: 100%; padding: 0 2rem;
+    position: relative; z-index: 2;
+}
+
+.portal-panel {
+    flex: 1;
+    position: relative;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 4rem 3rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 28px; /* Squircle border */
+    box-shadow: var(--shadow-lg);
+    transition: all 0.4s ease;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.portal-panel:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); border-color: var(--accent-primary); }
+
+.portal-icon {
+    width: 80px; height: 80px;
+    border-radius: 20px;
+    background: var(--bg-tertiary); color: var(--accent-primary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem; margin-bottom: 1.5rem;
+    transition: var(--transition);
+}
+.portal-panel:hover .portal-icon { transform: scale(1.1); background: var(--accent-gold-dim); }
+
+.portal-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem; text-align: center; color: var(--text-primary); }
+.portal-desc { color: var(--text-secondary); text-align: center; max-width: 320px; margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.5; }
+
+.portal-btn {
+    padding: 0.85rem 2.5rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600; font-size: 0.95rem;
+    background: var(--accent-primary);
+    color: #FFFFFF;
+    border: none; cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    display: inline-flex; align-items: center; justify-content: center;
+}
+.portal-btn:hover { background: var(--accent-primary-hover); transform: translateY(-2px); box-shadow: var(--shadow-md); color: #FFFFFF; }
+
+.portal-register {
+    margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);
+}
+.portal-register a { color: var(--accent-primary); font-weight: 600; }
+
+@media (max-width: 768px) {
+    .cards-container { flex-direction: column; }
+    .portal-panel { padding: 3rem 1.5rem; }
+}

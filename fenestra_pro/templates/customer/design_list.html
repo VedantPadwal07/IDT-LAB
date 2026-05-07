@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load static humanize %}
+{% block title %}My Designs — Fenestra Pro{% endblock %}
+{% block body %}
+<button class="mobile-menu-btn" aria-label="Menu">☰</button>
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-brand" style="display:flex; align-items:center; gap:0.75rem;">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                <rect x="3" y="3" width="26" height="26" rx="3" fill="var(--accent-gold-dim)" stroke="var(--accent-primary)" stroke-width="2.5"/>
+                <path d="M16 3v26M3 16h26" stroke="var(--accent-primary)" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M6 13l7-7M6 20l14-14" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+            </svg>
+            <div>
+                <h2 style="font-size:1.3rem; font-weight:700; margin:0; line-height:1;">FENESTRA <span style="color:var(--accent-primary);">PRO</span></h2>
+                <p style="margin:0; margin-top:0.2rem;">Customer Portal</p>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-item"><a href="{% url 'customer_dashboard' %}" class="nav-link"><span class="icon">📊</span> Dashboard</a></div>
+            <div class="nav-section">Design</div>
+            <div class="nav-item"><a href="{% url 'design_wizard' %}" class="nav-link"><span class="icon">✏️</span> New Design</a></div>
+            <div class="nav-item"><a href="{% url 'design_list' %}" class="nav-link active"><span class="icon">📋</span> My Designs</a></div>
+            <div class="nav-section">Orders</div>
+            <div class="nav-item"><a href="{% url 'quotation_list' %}" class="nav-link"><span class="icon">📄</span> Quotations</a></div>
+        </nav>
+        <div class="sidebar-footer"><div class="text-small text-muted">{{ request.user.company_name|default:request.user.username }}</div><a href="{% url 'logout' %}" class="text-small" style="color:var(--accent-red);">Sign Out</a></div>
+    </aside>
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-header-left">
+                <h1 class="page-title">My Designs</h1>
+                <p class="page-subtitle">{{ designs.count }} design{{ designs.count|pluralize }} total</p>
+            </div>
+            <div class="page-actions">
+                <form method="post" action="{% url 'create_quotation' %}" id="quoteForm">{% csrf_token %}
+                    <button type="submit" class="btn btn-secondary btn-sm" id="quoteBtn" disabled>Quote Selected</button>
+                </form>
+                <a href="{% url 'design_wizard' %}" class="btn btn-primary btn-sm">+ New Design</a>
+            </div>
+        </div>
+
+        {% if designs %}
+        <div class="table-wrapper">
+        <table class="data-table">
+            <thead><tr><th style="width:30px;"></th><th>Code</th><th>Name</th><th>Type</th><th>Size (mm)</th><th>Qty</th><th>Est. Cost</th><th>Status</th><th>Created</th></tr></thead>
+            <tbody>
+            {% for d in designs %}
+            <tr onclick="location.href='{% url 'design_detail' d.code %}'" style="cursor:pointer;" class="hover-row">
+                <td onclick="event.stopPropagation();">{% if d.status == 'draft' %}<input type="checkbox" name="design_ids" value="{{ d.code }}" form="quoteForm" class="design-check" style="accent-color:var(--accent-gold);">{% endif %}</td>
+                <td><strong class="text-gold font-mono">{{ d.code }}</strong></td>
+                <td class="wrap">{{ d.name }}</td>
+                <td>{{ d.get_design_type_display }}</td>
+                <td class="font-mono">{{ d.width_mm }}×{{ d.height_mm }}</td>
+                <td>{{ d.quantity }}</td>
+                <td class="text-nowrap">₹{{ d.estimated_cost|floatformat:0|intcomma }}</td>
+                <td><span class="badge badge-{{ d.status }}">{{ d.get_status_display }}</span></td>
+                <td class="text-muted text-small">{{ d.created_at|date:"d M Y" }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <div class="empty-state card card-static" style="padding:4rem 2rem;">
+            <div class="icon">📐</div>
+            <h3 class="mt-1">No designs yet</h3>
+            <p class="text-muted mt-1">Create your first window or door design to get started.</p>
+            <a href="{% url 'design_wizard' %}" class="btn btn-primary mt-2">Create First Design</a>
+        </div>
+        {% endif %}
+    </main>
+</div>
+<script>
+document.querySelectorAll('.design-check').forEach(c => c.addEventListener('change', () => {
+    document.getElementById('quoteBtn').disabled = !document.querySelectorAll('.design-check:checked').length;
+}));
+</script>
+{% endblock %}

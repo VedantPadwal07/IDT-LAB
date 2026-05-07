@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Register — Fenestra Pro{% endblock %}
+{% block extra_css %}
+<style>
+.register-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg-primary); padding: 2rem; }
+.register-page::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(240,165,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(240,165,0,0.02) 1px, transparent 1px); background-size: 50px 50px; pointer-events: none; }
+.register-card { width: 100%; max-width: 520px; padding: 2.5rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); position: relative; z-index: 1; }
+.register-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-light)); border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.register-header { text-align: center; margin-bottom: 2rem; }
+.register-header .brand { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800; }
+.register-header .brand span { color: var(--accent-gold); }
+</style>
+{% endblock %}
+{% block body %}
+<div class="register-page">
+    <div class="register-card">
+        <div class="register-header">
+            <div style="display:flex; align-items:center; justify-content:center; gap:0.75rem; margin-bottom:0.5rem;">
+                <svg width="36" height="36" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                    <rect x="3" y="3" width="26" height="26" rx="3" fill="var(--accent-gold-dim)" stroke="var(--accent-primary)" stroke-width="2.5"/>
+                    <path d="M16 3v26M3 16h26" stroke="var(--accent-primary)" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M6 13l7-7M6 20l14-14" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+                </svg>
+                <div class="brand" style="margin-bottom:0; font-size:1.8rem; line-height:1;">FENESTRA <span>PRO</span></div>
+            </div>
+            <p class="text-muted text-small mt-1">Create your customer account</p>
+        </div>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label">First Name</label>
+                    <input type="text" name="first_name" class="form-control" placeholder="First name" value="{{ form.first_name.value|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" name="last_name" class="form-control" placeholder="Last name" value="{{ form.last_name.value|default:'' }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Company Name *</label>
+                <input type="text" name="company_name" class="form-control" placeholder="Your company" required value="{{ form.company_name.value|default:'' }}">
+                {% if form.company_name.errors %}<div class="form-error">{{ form.company_name.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label">Username *</label>
+                    <input type="text" name="username" class="form-control" placeholder="Choose a username" required value="{{ form.username.value|default:'' }}">
+                    {% if form.username.errors %}<div class="form-error">{{ form.username.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email *</label>
+                    <input type="email" name="email" class="form-control" placeholder="email@company.com" required value="{{ form.email.value|default:'' }}">
+                    {% if form.email.errors %}<div class="form-error">{{ form.email.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="text" name="phone" class="form-control" placeholder="+91 ..." value="{{ form.phone.value|default:'' }}">
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label">Password *</label>
+                    <input type="password" name="password1" class="form-control" placeholder="Password" required>
+                    {% if form.password1.errors %}<div class="form-error">{{ form.password1.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm Password *</label>
+                    <input type="password" name="password2" class="form-control" placeholder="Confirm" required>
+                    {% if form.password2.errors %}<div class="form-error">{{ form.password2.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block mt-2">Create Account</button>
+        </form>
+        <p class="text-center text-muted text-small mt-2">Already have an account? <a href="{% url 'customer_login' %}">Sign in</a></p>
+        <p class="text-center mt-1"><a href="{% url 'landing' %}" class="text-small">← Back to Home</a></p>
+    </div>
+</div>
+{% endblock %}

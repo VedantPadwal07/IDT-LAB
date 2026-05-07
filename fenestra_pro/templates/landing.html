@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Fenestra Pro — Window & Door Fabrication{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/landing.css' %}">{% endblock %}
+{% block body %}
+<div class="landing-page">
+    <header class="landing-header">
+        <div>
+            <div style="display:flex; align-items:center; justify-content:center; gap:0.75rem; margin-bottom:0.5rem;">
+                <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"
+                    style="flex-shrink:0;">
+                    <rect x="3" y="3" width="26" height="26" rx="3" fill="var(--accent-gold-dim)"
+                        stroke="var(--accent-primary)" stroke-width="2.5" />
+                    <path d="M16 3v26M3 16h26" stroke="var(--accent-primary)" stroke-width="2.5"
+                        stroke-linecap="round" />
+                    <path d="M6 13l7-7M6 20l14-14" stroke="var(--accent-primary)" stroke-width="2"
+                        stroke-linecap="round" opacity="0.3" />
+                </svg>
+                <div class="landing-logo" style="margin-bottom:0; line-height:1;">FENESTRA <span>PRO</span></div>
+            </div>
+            <div class="landing-tagline">Precision Fabrication Management</div>
+        </div>
+    </header>
+    <div class="cards-container">
+        <div class="portal-panel" onclick="window.location.href='{% url "customer_login" %}'">  
+            <div class="portal-icon">🏠</div>
+            <h2 class="portal-title">Customer Portal</h2>
+            <p class="portal-desc">Design your windows & doors, get instant quotations, and track your orders — all in
+                one place.</p>
+            <a href="{% url 'customer_login' %}" class="portal-btn">Customer Login</a>
+            <p class="portal-register">New customer? <a href="{% url 'customer_register' %}"
+                    style="pointer-events: relative; z-index: 2;">Create Account</a></p>
+        </div>
+        <div class="portal-panel" onclick="window.location.href='{% url "maker_login" %}'">
+            <div class="portal-icon">⚙</div>
+            <h2 class="portal-title">Maker Portal</h2>
+            <p class="portal-desc">Full system access — manage materials, pricing, orders, and generate professional
+                reports.</p>
+            <a href="{% url 'maker_login' %}" class="portal-btn">Manufacturer Login</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

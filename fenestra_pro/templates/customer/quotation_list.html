@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static humanize %}
+{% block title %}Quotations — Fenestra Pro{% endblock %}
+{% block body %}
+<button class="mobile-menu-btn" aria-label="Menu">☰</button>
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-brand" style="display:flex; align-items:center; gap:0.75rem;">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                <rect x="3" y="3" width="26" height="26" rx="3" fill="var(--accent-gold-dim)" stroke="var(--accent-primary)" stroke-width="2.5"/>
+                <path d="M16 3v26M3 16h26" stroke="var(--accent-primary)" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M6 13l7-7M6 20l14-14" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+            </svg>
+            <div>
+                <h2 style="font-size:1.3rem; font-weight:700; margin:0; line-height:1;">FENESTRA <span style="color:var(--accent-primary);">PRO</span></h2>
+                <p style="margin:0; margin-top:0.2rem;">{% if request.user.is_maker %}Maker{% else %}Customer{% endif %} Portal</p>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link"><span class="icon">📊</span> Dashboard</a></div>
+            <div class="nav-item"><a href="{% url 'design_list' %}" class="nav-link"><span class="icon">📋</span> {% if request.user.is_maker %}Orders{% else %}Designs{% endif %}</a></div>
+            <div class="nav-item"><a href="{% url 'quotation_list' %}" class="nav-link active"><span class="icon">📄</span> Quotations</a></div>
+            {% if request.user.is_maker %}<div class="nav-item"><a href="{% url 'admin:index' %}" class="nav-link"><span class="icon">⚙️</span> Admin</a></div>{% endif %}
+        </nav>
+        <div class="sidebar-footer"><div class="text-small text-muted">{{ request.user.company_name|default:request.user.username }}</div><a href="{% url 'logout' %}" class="text-small" style="color:var(--accent-red);">Sign Out</a></div>
+    </aside>
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-header-left"><h1 class="page-title">Quotations</h1><p class="page-subtitle">{{ quotations.count }} quotation{{ quotations.count|pluralize }}</p></div>
+        </div>
+        {% if quotations %}
+        <div class="table-wrapper">
+        <table class="data-table">
+            <thead><tr><th>Number</th><th>Customer</th><th>Items</th><th>Total</th><th>Valid Until</th><th>Status</th><th></th></tr></thead>
+            <tbody>{% for q in quotations %}<tr onclick="location.href='{% url 'quotation_detail' q.quotation_number %}'" style="cursor:pointer;" class="hover-row">
+                <td><strong class="text-gold font-mono">{{ q.quotation_number }}</strong></td>
+                <td>{{ q.customer.company_name|default:q.customer.username }}</td>
+                <td>{{ q.designs.count }}</td>
+                <td class="text-nowrap font-mono">₹{{ q.total|floatformat:0|intcomma }}</td>
+                <td>{{ q.valid_until|date:"d M Y" }}</td>
+                <td><span class="badge badge-{{ q.status }}">{{ q.get_status_display }}</span></td>
+                <td onclick="event.stopPropagation();"><a href="{% url 'download_quotation_pdf' q.quotation_number %}" class="btn btn-secondary btn-sm">📄 PDF</a></td>
+            </tr>{% endfor %}</tbody>
+        </table>
+        </div>
+        {% else %}
+        <div class="empty-state card card-static" style="padding:4rem 2rem;">
+            <div class="icon">📄</div>
+            <h3 class="mt-1">No quotations yet</h3>
+            <p class="text-muted mt-1">Quotations are generated from your designs.</p>
+        </div>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

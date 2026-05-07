@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load static humanize %}
+{% block title %}Dashboard — Fenestra Pro{% endblock %}
+{% block body %}
+<button class="mobile-menu-btn" aria-label="Menu">☰</button>
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-brand" style="display:flex; align-items:center; gap:0.75rem;">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                <rect x="3" y="3" width="26" height="26" rx="3" fill="var(--accent-gold-dim)" stroke="var(--accent-primary)" stroke-width="2.5"/>
+                <path d="M16 3v26M3 16h26" stroke="var(--accent-primary)" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M6 13l7-7M6 20l14-14" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+            </svg>
+            <div>
+                <h2 style="font-size:1.3rem; font-weight:700; margin:0; line-height:1;">FENESTRA <span style="color:var(--accent-primary);">PRO</span></h2>
+                <p style="margin:0; margin-top:0.2rem;">Customer Portal</p>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-item"><a href="{% url 'customer_dashboard' %}" class="nav-link active"><span class="icon">📊</span> Dashboard</a></div>
+            <div class="nav-section">Design</div>
+            <div class="nav-item"><a href="{% url 'design_wizard' %}" class="nav-link"><span class="icon">✏️</span> New Design</a></div>
+            <div class="nav-item"><a href="{% url 'design_list' %}" class="nav-link"><span class="icon">📋</span> My Designs</a></div>
+            <div class="nav-section">Orders</div>
+            <div class="nav-item"><a href="{% url 'quotation_list' %}" class="nav-link"><span class="icon">📄</span> Quotations</a></div>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="text-small text-muted">{{ request.user.company_name|default:request.user.username }}</div>
+            <a href="{% url 'logout' %}" class="text-small" style="color: var(--accent-red);">Sign Out</a>
+        </div>
+    </aside>
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-header-left">
+                <h1 class="page-title">Welcome, {{ request.user.first_name|default:request.user.username }}</h1>
+                <p class="page-subtitle">Here's your project overview</p>
+            </div>
+            <div class="page-actions">
+                <a href="{% url 'design_wizard' %}" class="btn btn-primary">+ New Design</a>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="card">
+                <div class="card-header"><div class="card-icon">📐</div></div>
+                <div class="card-value">{{ total_designs }}</div>
+                <div class="card-label">Total Designs</div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="card-icon">📝</div></div>
+                <div class="card-value">{{ draft_designs }}</div>
+                <div class="card-label">Drafts</div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="card-icon">📄</div></div>
+                <div class="card-value">{{ quoted_designs }}</div>
+                <div class="card-label">Quoted</div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="card-icon">🏭</div></div>
+                <div class="card-value">{{ in_production }}</div>
+                <div class="card-label">In Production</div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="card-icon">✅</div></div>
+                <div class="card-value">{{ completed }}</div>
+                <div class="card-label">Completed</div>
+            </div>
+        </div>
+
+        <div class="detail-grid">
+            <div>
+                <h3 class="section-title">Recent Designs</h3>
+                {% if recent_designs %}
+                <div class="table-wrapper">
+                <table class="data-table">
+                    <thead><tr><th>Code</th><th>Name</th><th>Type</th><th>Status</th></tr></thead>
+                    <tbody>
+                    {% for d in recent_designs %}
+                    <tr onclick="location.href='{% url 'design_detail' d.code %}'" style="cursor:pointer;">
+                        <td><strong class="text-gold font-mono">{{ d.code }}</strong></td>
+                        <td class="wrap">{{ d.name }}</td>
+                        <td>{{ d.get_design_type_display }}</td>
+                        <td><span class="badge badge-{{ d.status }}">{{ d.get_status_display }}</span></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+                {% else %}
+                <div class="empty-state card card-static">
+                    <div class="icon">📐</div>
+                    <p>No designs yet.</p>
+                    <a href="{% url 'design_wizard' %}" class="btn btn-primary btn-sm mt-2">Create Your First Design</a>
+                </div>
+                {% endif %}
+            </div>
+            <div>
+                <h3 class="section-title">Recent Quotations</h3>
+                {% if quotations %}
+                {% for q in quotations %}
+                <a href="{% url 'quotation_detail' q.quotation_number %}" class="card" style="display:block;margin-bottom:0.75rem;padding:1rem;">
+                    <div class="flex-between">
+                        <strong class="text-gold font-mono">{{ q.quotation_number }}</strong>
+                        <span class="badge badge-{{ q.status }}">{{ q.get_status_display }}</span>
+                    </div>
+                    <div class="text-small text-muted mt-1">Total: ₹{{ q.total|floatformat:2|intcomma }}</div>
+                </a>
+                {% endfor %}
+                {% else %}
+                <div class="empty-state card card-static">
+                    <div class="icon">📄</div>
+                    <p>No quotations yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
