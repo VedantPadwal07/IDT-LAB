@@ -43,7 +43,7 @@
         {% if designs %}
         <div class="table-wrapper">
         <table class="data-table">
-            <thead><tr><th style="width:30px;"></th><th>Code</th><th>Name</th><th>Type</th><th>Size (mm)</th><th>Qty</th><th>Est. Cost</th><th>Status</th><th>Created</th></tr></thead>
+            <thead><tr><th style="width:30px;"></th><th>Code</th><th>Name</th><th>Type</th><th>Size (mm)</th><th>Qty</th><th>Est. Cost</th><th>Status</th><th>Created</th><th style="width:50px;"></th></tr></thead>
             <tbody>
             {% for d in designs %}
             <tr onclick="location.href='{% url 'design_detail' d.code %}'" style="cursor:pointer;" class="hover-row">
@@ -56,6 +56,14 @@
                 <td class="text-nowrap">₹{{ d.estimated_cost|floatformat:0|intcomma }}</td>
                 <td><span class="badge badge-{{ d.status }}">{{ d.get_status_display }}</span></td>
                 <td class="text-muted text-small">{{ d.created_at|date:"d M Y" }}</td>
+                <td onclick="event.stopPropagation();">
+                    {% if d.status == 'draft' %}
+                    <form method="post" action="{% url 'design_delete' d.code %}" onsubmit="return confirm('Delete design {{ d.code }}? This cannot be undone.');" style="margin:0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-icon-delete" title="Delete design" aria-label="Delete">🗑️</button>
+                    </form>
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
             </tbody>

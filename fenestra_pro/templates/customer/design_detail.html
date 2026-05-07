@@ -44,6 +44,12 @@
                 {% if request.user.is_maker %}
                 <a href="{% url 'download_production_pdf' design.code %}" class="btn btn-primary btn-sm">🛠 Production PDF</a>
                 {% endif %}
+                {% if request.user.is_customer and design.status == 'draft' %}
+                <form method="post" action="{% url 'design_delete' design.code %}" onsubmit="return confirm('Delete design {{ design.code }}? This action cannot be undone.');" style="display:inline;margin:0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">🗑️ Delete</button>
+                </form>
+                {% endif %}
             </div>
         </div>
 
